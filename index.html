@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <title>Scatterplots and sample covariance</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" href="index_files/reveal.js-3.3.0.1/css/reveal.css"/>
+
+
+<style type="text/css">
+code.sourceCode > span { display: inline-block; line-height: 1.25; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<link rel="stylesheet" href="index_files/reveal.js-3.3.0.1/css/theme/solarized.css" id="theme">
+
+
+  <!-- some tweaks to reveal css -->
+  <style type="text/css">
+    .reveal h1 { font-size: 2.0em; }
+    .reveal h2 { font-size: 1.5em;  }
+    .reveal h3 { font-size: 1.25em;	}
+    .reveal h4 { font-size: 1em;	}
+
+    .reveal .slides>section,
+    .reveal .slides>section>section {
+      padding: 0px 0px;
+    }
+
+
+
+    .reveal table {
+      border-width: 1px;
+      border-spacing: 2px;
+      border-style: dotted;
+      border-color: gray;
+      border-collapse: collapse;
+      font-size: 0.7em;
+    }
+
+    .reveal table th {
+      border-width: 1px;
+      padding-left: 10px;
+      padding-right: 25px;
+      font-weight: bold;
+      border-style: dotted;
+      border-color: gray;
+    }
+
+    .reveal table td {
+      border-width: 1px;
+      padding-left: 10px;
+      padding-right: 25px;
+      border-style: dotted;
+      border-color: gray;
+    }
+
+
+  </style>
+
+    <style type="text/css">code{white-space: pre;}</style>
+
+    <link rel="stylesheet" href="mystyle.css"/>
+
+<!-- Printing and PDF exports -->
+<script id="paper-css" type="application/dynamic-css">
+
+/* Default Print Stylesheet Template
+   by Rob Glazebrook of CSSnewbie.com
+   Last Updated: June 4, 2008
+
+   Feel free (nay, compelled) to edit, append, and
+   manipulate this file as you see fit. */
+
+
+@media print {
+
+	/* SECTION 1: Set default width, margin, float, and
+	   background. This prevents elements from extending
+	   beyond the edge of the printed page, and prevents
+	   unnecessary background images from printing */
+	html {
+		background: #fff;
+		width: auto;
+		height: auto;
+		overflow: visible;
+	}
+	body {
+		background: #fff;
+		font-size: 20pt;
+		width: auto;
+		height: auto;
+		border: 0;
+		margin: 0 5%;
+		padding: 0;
+		overflow: visible;
+		float: none !important;
+	}
+
+	/* SECTION 2: Remove any elements not needed in print.
+	   This would include navigation, ads, sidebars, etc. */
+	.nestedarrow,
+	.controls,
+	.fork-reveal,
+	.share-reveal,
+	.state-background,
+	.reveal .progress,
+	.reveal .backgrounds {
+		display: none !important;
+	}
+
+	/* SECTION 3: Set body font face, size, and color.
+	   Consider using a serif font for readability. */
+	body, p, td, li, div {
+		font-size: 20pt!important;
+		font-family: Georgia, "Times New Roman", Times, serif !important;
+		color: #000;
+	}
+
+	/* SECTION 4: Set heading font face, sizes, and color.
+	   Differentiate your headings from your body text.
+	   Perhaps use a large sans-serif for distinction. */
+	h1,h2,h3,h4,h5,h6 {
+		color: #000!important;
+		height: auto;
+		line-height: normal;
+		font-family: Georgia, "Times New Roman", Times, serif !important;
+		text-shadow: 0 0 0 #000 !important;
+		text-align: left;
+		letter-spacing: normal;
+	}
+	/* Need to reduce the size of the fonts for printing */
+	h1 { font-size: 28pt !important;  }
+	h2 { font-size: 24pt !important; }
+	h3 { font-size: 22pt !important; }
+	h4 { font-size: 22pt !important; font-variant: small-caps; }
+	h5 { font-size: 21pt !important; }
+	h6 { font-size: 20pt !important; font-style: italic; }
+
+	/* SECTION 5: Make hyperlinks more usable.
+	   Ensure links are underlined, and consider appending
+	   the URL to the end of the link for usability. */
+	a:link,
+	a:visited {
+		color: #000 !important;
+		font-weight: bold;
+		text-decoration: underline;
+	}
+	/*
+	.reveal a:link:after,
+	.reveal a:visited:after {
+		content: " (" attr(href) ") ";
+		color: #222 !important;
+		font-size: 90%;
+	}
+	*/
+
+
+	/* SECTION 6: more reveal.js specific additions by @skypanther */
+	ul, ol, div, p {
+		visibility: visible;
+		position: static;
+		width: auto;
+		height: auto;
+		display: block;
+		overflow: visible;
+		margin: 0;
+		text-align: left !important;
+	}
+	.reveal pre,
+	.reveal table {
+		margin-left: 0;
+		margin-right: 0;
+	}
+	.reveal pre code {
+		padding: 20px;
+		border: 1px solid #ddd;
+	}
+	.reveal blockquote {
+		margin: 20px 0;
+	}
+	.reveal .slides {
+		position: static !important;
+		width: auto !important;
+		height: auto !important;
+
+		left: 0 !important;
+		top: 0 !important;
+		margin-left: 0 !important;
+		margin-top: 0 !important;
+		padding: 0 !important;
+		zoom: 1 !important;
+
+		overflow: visible !important;
+		display: block !important;
+
+		text-align: left !important;
+		-webkit-perspective: none;
+		   -moz-perspective: none;
+		    -ms-perspective: none;
+		        perspective: none;
+
+		-webkit-perspective-origin: 50% 50%;
+		   -moz-perspective-origin: 50% 50%;
+		    -ms-perspective-origin: 50% 50%;
+		        perspective-origin: 50% 50%;
+	}
+	.reveal .slides section {
+		visibility: visible !important;
+		position: static !important;
+		width: auto !important;
+		height: auto !important;
+		display: block !important;
+		overflow: visible !important;
+
+		left: 0 !important;
+		top: 0 !important;
+		margin-left: 0 !important;
+		margin-top: 0 !important;
+		padding: 60px 20px !important;
+		z-index: auto !important;
+
+		opacity: 1 !important;
+
+		page-break-after: always !important;
+
+		-webkit-transform-style: flat !important;
+		   -moz-transform-style: flat !important;
+		    -ms-transform-style: flat !important;
+		        transform-style: flat !important;
+
+		-webkit-transform: none !important;
+		   -moz-transform: none !important;
+		    -ms-transform: none !important;
+		        transform: none !important;
+
+		-webkit-transition: none !important;
+		   -moz-transition: none !important;
+		    -ms-transition: none !important;
+		        transition: none !important;
+	}
+	.reveal .slides section.stack {
+		padding: 0 !important;
+	}
+	.reveal section:last-of-type {
+		page-break-after: avoid !important;
+	}
+	.reveal section .fragment {
+		opacity: 1 !important;
+		visibility: visible !important;
+
+		-webkit-transform: none !important;
+		   -moz-transform: none !important;
+		    -ms-transform: none !important;
+		        transform: none !important;
+	}
+	.reveal section img {
+		display: block;
+		margin: 15px 0px;
+		background: rgba(255,255,255,1);
+		border: 1px solid #666;
+		box-shadow: none;
+	}
+
+	.reveal section small {
+		font-size: 0.8em;
+	}
+
+}  
+</script>
+
+
+<script id="pdf-css" type="application/dynamic-css">
+    
+/**
+ * This stylesheet is used to print reveal.js
+ * presentations to PDF.
+ *
+ * https://github.com/hakimel/reveal.js#pdf-export
+ */
+
+* {
+	-webkit-print-color-adjust: exact;
+}
+
+body {
+	margin: 0 auto !important;
+	border: 0;
+	padding: 0;
+	float: none !important;
+	overflow: visible;
+}
+
+html {
+	width: 100%;
+	height: 100%;
+	overflow: visible;
+}
+
+/* Remove any elements not needed in print. */
+.nestedarrow,
+.reveal .controls,
+.reveal .progress,
+.reveal .playback,
+.reveal.overview,
+.fork-reveal,
+.share-reveal,
+.state-background {
+	display: none !important;
+}
+
+h1, h2, h3, h4, h5, h6 {
+	text-shadow: 0 0 0 #000 !important;
+}
+
+.reveal pre code {
+	overflow: hidden !important;
+	font-family: Courier, 'Courier New', monospace !important;
+}
+
+ul, ol, div, p {
+	visibility: visible;
+	position: static;
+	width: auto;
+	height: auto;
+	display: block;
+	overflow: visible;
+	margin: auto;
+}
+.reveal {
+	width: auto !important;
+	height: auto !important;
+	overflow: hidden !important;
+}
+.reveal .slides {
+	position: static;
+	width: 100%;
+	height: auto;
+
+	left: auto;
+	top: auto;
+	margin: 0 !important;
+	padding: 0 !important;
+
+	overflow: visible;
+	display: block;
+
+	-webkit-perspective: none;
+	   -moz-perspective: none;
+	    -ms-perspective: none;
+	        perspective: none;
+
+	-webkit-perspective-origin: 50% 50%; /* there isn't a none/auto value but 50-50 is the default */
+	   -moz-perspective-origin: 50% 50%;
+	    -ms-perspective-origin: 50% 50%;
+	        perspective-origin: 50% 50%;
+}
+
+.reveal .slides section {
+	page-break-after: always !important;
+
+	visibility: visible !important;
+	position: relative !important;
+	display: block !important;
+	position: relative !important;
+
+	margin: 0 !important;
+	padding: 0 !important;
+	box-sizing: border-box !important;
+	min-height: 1px;
+
+	opacity: 1 !important;
+
+	-webkit-transform-style: flat !important;
+	   -moz-transform-style: flat !important;
+	    -ms-transform-style: flat !important;
+	        transform-style: flat !important;
+
+	-webkit-transform: none !important;
+	   -moz-transform: none !important;
+	    -ms-transform: none !important;
+	        transform: none !important;
+}
+
+.reveal section.stack {
+	margin: 0 !important;
+	padding: 0 !important;
+	page-break-after: avoid !important;
+	height: auto !important;
+	min-height: auto !important;
+}
+
+.reveal img {
+	box-shadow: none;
+}
+
+.reveal .roll {
+	overflow: visible;
+	line-height: 1em;
+}
+
+/* Slide backgrounds are placed inside of their slide when exporting to PDF */
+.reveal section .slide-background {
+	display: block !important;
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	z-index: -1;
+}
+
+/* All elements should be above the slide-background */
+.reveal section>* {
+	position: relative;
+	z-index: 1;
+}
+
+/* Display slide speaker notes when 'showNotes' is enabled */
+.reveal .speaker-notes-pdf {
+	display: block;
+	width: 100%;
+	max-height: none;
+	left: auto;
+	top: auto;
+	z-index: 100;
+}
+
+/* Display slide numbers when 'slideNumber' is enabled */
+.reveal .slide-number-pdf {
+	display: block;
+	position: absolute;
+	font-size: 14px;
+}
+
+</script>
+
+
+<script>
+var style = document.createElement( 'style' );
+style.type = 'text/css';
+var style_script_id = window.location.search.match( /print-pdf/gi ) ? 'pdf-css' : 'paper-css';
+var style_script = document.getElementById(style_script_id).text;
+style.innerHTML = style_script;
+document.getElementsByTagName('head')[0].appendChild(style);
+</script>
+
+    <link href="index_files/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+    <link href="index_files/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+
+<section class="slide level2">
+
+<section>
+<h1>
+Scatterplots and sample covariance
+</h1>
+<p>Based on Stock and Watson, ch. 3</p>
+<p><br></p>
+<h2>
+<a href="mailto:jesper.bagger@rhul.ac.uk">Jesper Bagger</a>
+</h2>
+<h3>
+EC3133 | Royal Holloway | 2020/21
+</h3>
+</section>
+<!-- # Outline -->
+<!-- 1. Statistics with more than one random variable -->
+<!-- 2. Scatterplots -->
+<!-- 3. Sample covariance -->
+</section>
+<section><section id="relationships-between-random-variables" class="title-slide slide level1"><h1>Relationships between random variables</h1></section><section id="relationships-between-random-variables-1" class="slide level2">
+<h2>Relationships between random variables</h2>
+<ul>
+<li><p>Most interesting empirical questions relate to the relationship between random variables</p>
+<ul>
+<li><p>Education and earnings</p></li>
+<li><p>Class size and student outcomes</p></li>
+<li><p>The FTSE index and commodity prices</p></li>
+</ul></li>
+<li><p>Need tools to describe the sample relationship between random variables</p>
+<ul>
+<li><p>Scatterplots</p></li>
+<li><p>Sample covariance</p></li>
+</ul></li>
+</ul>
+</section></section>
+<section><section id="scatterplots" class="title-slide slide level1"><h1>Scatterplots</h1></section><section id="scatterplot" class="slide level2">
+<h2>Scatterplot</h2>
+<p><img data-src="index_files/figure-revealjs/unnamed-chunk-2-1.png" /><!-- --></p>
+</section><section id="scatter-plots-in-r" class="slide level2">
+<h2>Scatter plots in R</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="kw">library</span>(AER) <span class="co"># Load AER library</span></span>
+<span id="cb1-2"><a href="#cb1-2"></a><span class="kw">data</span>(CASchools) <span class="co"># Load CASchools dataframe from AER library</span></span>
+<span id="cb1-3"><a href="#cb1-3"></a></span>
+<span id="cb1-4"><a href="#cb1-4"></a><span class="co"># Add student-teacher (STR) ratio and testscore (Score) to CASchools</span></span>
+<span id="cb1-5"><a href="#cb1-5"></a>CASchools<span class="op">$</span>STR &lt;-<span class="st"> </span>CASchools<span class="op">$</span>students<span class="op">/</span>CASchools<span class="op">$</span>teachers</span>
+<span id="cb1-6"><a href="#cb1-6"></a>CASchools<span class="op">$</span>Score &lt;-<span class="st"> </span>(CASchools<span class="op">$</span>read <span class="op">+</span><span class="st"> </span>CASchools<span class="op">$</span>math)<span class="op">/</span><span class="dv">2</span></span>
+<span id="cb1-7"><a href="#cb1-7"></a></span>
+<span id="cb1-8"><a href="#cb1-8"></a><span class="co"># Scatter plot</span></span>
+<span id="cb1-9"><a href="#cb1-9"></a><span class="kw">plot</span>(CASchools<span class="op">$</span>STR,CASchools<span class="op">$</span>Score,</span>
+<span id="cb1-10"><a href="#cb1-10"></a>     <span class="dt">main =</span> <span class="st">&quot;Student-teacher ratio and test scores&quot;</span>,</span>
+<span id="cb1-11"><a href="#cb1-11"></a>     <span class="dt">xlab =</span> <span class="st">&quot;Student-teacher ratio&quot;</span>, </span>
+<span id="cb1-12"><a href="#cb1-12"></a>     <span class="dt">ylab =</span> <span class="st">&quot;Test score&quot;</span>) </span></code></pre></div>
+</section><section id="scatterplots-1" class="slide level2">
+<h2>Scatterplots</h2>
+<ul>
+<li><p>Useful tool for describing relationships in the data, including nonlinear relationships</p></li>
+<li><p>Conveys the range of observations in the data</p></li>
+<li><p>Treats variables symmetrically; silent about causality</p></li>
+<li><p>Applicable to bivariate relationships</p></li>
+</ul>
+</section></section>
+<section><section id="sample-covariance" class="title-slide slide level1"><h1>Sample covariance</h1></section><section id="population-and-sample" class="slide level2">
+<h2>Population and sample</h2>
+<ul>
+<li><p>The <strong>population</strong> is the entire pool from which a statistical sample is drawn (people, firms, objects, etc.)</p></li>
+<li><p>The <strong>sample</strong> is a subset of the population</p></li>
+<li><p>Statistics (and econometrics) deals with what we can learn about the population from a sample</p></li>
+</ul>
+</section><section id="simple-random-sampling-and-i.i.d.-samples" class="slide level2">
+<h2>Simple random sampling and i.i.d. samples</h2>
+<ul>
+<li><p>Suppose we are interested in the random variable <span class="math inline">\(Y\)</span> with population distribution <span class="math inline">\(f_Y(y)\)</span></p></li>
+<li><p>Sample population <strong>at random</strong> <span class="math inline">\(n\)</span> times; each population-member is <strong>equally likely to be included</strong>:</p>
+<p><span class="math display">\[\{Y_i; i=1,...,n\}\]</span></p></li>
+<li><p>Random sampling means it is appropriate to treat the sample as a <strong>collection of <span class="math inline">\(n\)</span> random variables</strong></p></li>
+<li><p>Simple random sampling produces an <strong>independently and identically distributed (i.i.d.) sample</strong></p>
+<p><span class="math display">\[f_{Y_i}(y) = f_Y(y)\]</span></p></li>
+</ul>
+</section><section id="population-and-sample-average" class="slide level2">
+<h2>Population and sample average</h2>
+<ul>
+<li><p>The <strong>population average</strong> of <span class="math inline">\(Y\)</span> is</p>
+<p><span class="math display">\[\mu_{Y} = \mathrm{E}(Y) = \int y f_Y(y)dy,\]</span></p></li>
+<li><p>The <strong>sample average</strong> is an estimator of <span class="math inline">\(\mu_{Y}\)</span></p>
+<div class="box">
+<p><span class="math display">\[\overline{Y} = \frac{1}{n} \sum_{i=1}^n Y_i\]</span></p>
+</div></li>
+</ul>
+</section><section id="sample-average-in-r" class="slide level2">
+<h2>Sample average in R</h2>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a><span class="co"># Sample average student-teacher ratio</span></span>
+<span id="cb2-2"><a href="#cb2-2"></a>mu_STR &lt;-<span class="st"> </span><span class="kw">mean</span>(CASchools<span class="op">$</span>STR) <span class="co"># Sample average of STR</span></span>
+<span id="cb2-3"><a href="#cb2-3"></a>mu_STR </span></code></pre></div>
+<pre><code>## [1] 19.64043</code></pre>
+</section><section id="population-and-sample-variance" class="slide level2">
+<h2>Population and sample variance</h2>
+<ul>
+<li><p>The <strong>population variance</strong> of <span class="math inline">\(Y\)</span> is</p>
+<p><span class="math display">\[\sigma^2_{Y} = \mathrm{var}(Y) = \mathrm{E}[(Y - \mu_Y)^2]\]</span></p></li>
+<li><p>The <strong>sample variance</strong> is an estimator of <span class="math inline">\(\sigma^2_{Y}\)</span>:</p>
+<div class="box">
+<p><span class="math display">\[s^2_{Y} = \frac{1}{n-1} \sum_{i=1}^n (Y_i - \overline{Y})^2\]</span></p>
+</div></li>
+<li><p>Standard deviations are <span class="math inline">\(\sigma_{Y} = \sqrt{\sigma^2_{Y}}\)</span> and <span class="math inline">\(s_{Y} = \sqrt{s^2_{Y}}\)</span></p></li>
+</ul>
+</section><section id="sample-variance-and-standard-deviation-in-r" class="slide level2">
+<h2>Sample variance and standard deviation in R</h2>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a><span class="co"># Sample variance and s.d. of student-teacher ratio</span></span>
+<span id="cb4-2"><a href="#cb4-2"></a>s2_STR &lt;-<span class="st"> </span><span class="kw">var</span>(CASchools<span class="op">$</span>STR) <span class="co"># Sample variance of STR</span></span>
+<span id="cb4-3"><a href="#cb4-3"></a>s2_STR</span></code></pre></div>
+<pre><code>## [1] 3.578952</code></pre>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1"></a>s_STR &lt;-<span class="st"> </span><span class="kw">sd</span>(CASchools<span class="op">$</span>STR) <span class="co"># Sample standard deviation of STR</span></span>
+<span id="cb6-2"><a href="#cb6-2"></a>s_STR</span></code></pre></div>
+<pre><code>## [1] 1.891812</code></pre>
+</section><section id="sample-covariance-1" class="slide level2">
+<h2>Sample covariance</h2>
+<ul>
+<li><p>The <strong>population covariance</strong> between two random variables <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> is</p>
+<p><span class="math display">\[\sigma_{XY} = \mathrm{E}[(X-\mu_X)(Y-\mu_Y)]\]</span></p></li>
+<li><p>The <strong>sample covariance</strong> is an estimator of <span class="math inline">\(\sigma_{XY}\)</span>:</p>
+<div class="box">
+<p><span class="math display">\[s_{XY} = \frac{1}{n-1} \sum_{i=1}^n (X_i - \overline{X})(Y_i - \overline{Y})\]</span></p>
+</div></li>
+</ul>
+</section><section id="sample-correlation" class="slide level2">
+<h2>Sample correlation</h2>
+<ul>
+<li><p>The population correlation between <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> is</p>
+<p><span class="math display">\[\rho_{XY} = \frac{\sigma_{XY}}{\sigma_X \sigma_Y}\]</span></p></li>
+<li><p>The <strong>sample correlation</strong> is an estimator of <span class="math inline">\(\rho_{XY}\)</span>, replacing population quantities w/ analogous sample quantities:</p>
+<div class="box">
+<p><span class="math display">\[r_{XY} = \frac{s_{XY}}{s_X s_Y}\]</span></p>
+</div></li>
+</ul>
+</section><section id="sample-covariance-and-correlation-in-r" class="slide level2">
+<h2>Sample covariance and correlation in R</h2>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1"></a><span class="co"># Sample covariance b/w STR and Score</span></span>
+<span id="cb8-2"><a href="#cb8-2"></a>s_STR_Score &lt;-<span class="st"> </span><span class="kw">cov</span>(CASchools<span class="op">$</span>STR,CASchools<span class="op">$</span>Score) </span>
+<span id="cb8-3"><a href="#cb8-3"></a>s_STR_Score</span></code></pre></div>
+<pre><code>## [1] -8.159323</code></pre>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1"></a><span class="co"># Sample correlation b/w STR and Score</span></span>
+<span id="cb10-2"><a href="#cb10-2"></a>r_STR_Score &lt;-<span class="st"> </span><span class="kw">cor</span>(CASchools<span class="op">$</span>STR,CASchools<span class="op">$</span>Score) </span>
+<span id="cb10-3"><a href="#cb10-3"></a>r_STR_Score</span></code></pre></div>
+<pre><code>## [1] -0.2263627</code></pre>
+</section><section id="consistency" class="slide level2">
+<h2>Consistency</h2>
+<ul>
+<li><p>The estimators <span class="math inline">\(\overline{Y}\)</span>, <span class="math inline">\(s^2_Y\)</span>, and <span class="math inline">\(s_{XY}\)</span> are <strong>consistent estimators</strong> of the population parameters <span class="math inline">\(\mu_Y\)</span>, <span class="math inline">\(\sigma_Y^2\)</span>, and <span class="math inline">\(\sigma_{XY}\)</span></p>
+<div class="box">
+<p><span class="math display">\[\overline{Y} \overset{p}{\rightarrow} \mu_Y; \quad s^2_Y \overset{p}{\rightarrow} \sigma_Y^2; \quad s_{XY} \overset{p}{\rightarrow} \sigma_{XY}\]</span></p>
+</div></li>
+<li><p>There is a high probability that <span class="math inline">\(\overline{Y}\)</span>, <span class="math inline">\(s^2_Y\)</span>, and <span class="math inline">\(s_{XY}\)</span> are close to <span class="math inline">\(\mu_Y\)</span>, <span class="math inline">\(\sigma_Y^2\)</span>, and <span class="math inline">\(\sigma_{XY}\)</span>, respectively, in large samples</p></li>
+</ul>
+</section><section id="sample-correlation-examples" class="slide level2">
+<h2>Sample correlation examples</h2>
+<p><img src="index_files/figure-revealjs/unnamed-chunk-7-1.png" width="80%" /></p>
+</section><section id="sample-covariance-and-correlation" class="slide level2">
+<h2>Sample covariance and correlation</h2>
+<ul>
+<li><p>Concise record of the relationship between two random variables <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span></p></li>
+<li><p>Measures the strength of the <strong>linear</strong> relationship between two random variables <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span></p></li>
+<li><p>Covariance and correlation treat <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> symmetrically: correlation does not imply causation</p></li>
+</ul>
+</section></section>
+<section><section id="summary" class="title-slide slide level1"><h1>Summary</h1></section><section id="summary-1" class="slide level2">
+<h2>Summary</h2>
+<ul>
+<li><p>Scatterplots and sample correlations illustrate relationship b/w two random variables</p></li>
+<li><p>Scatterplots capture nonlinearities, but do not provide quantitative summary</p></li>
+<li><p>Sample correlations provide quantitative summary, but measures only linear relationship</p></li>
+<li><p>Scatterplot relations or correlations does not imply causality</p></li>
+</ul>
+</section></section>
+    </div>
+  </div>
+
+  <script src="index_files/reveal.js-3.3.0.1/lib/js/head.min.js"></script>
+  <script src="index_files/reveal.js-3.3.0.1/js/reveal.js"></script>
+
+  <script>
+
+      // Full list of configuration options available at:
+      // https://github.com/hakimel/reveal.js#configuration
+      Reveal.initialize({
+        // Display the page number of the current slide
+        slideNumber: true,
+        // Push each slide change to the browser history
+        history: true,
+        // Vertical centering of slides
+        center: true,
+        // Opens links in an iframe preview overlay
+        previewLinks: false,
+        // Transition style
+        transition: 'none', // none/fade/slide/convex/concave/zoom
+        // Transition style for full page slide backgrounds
+        backgroundTransition: 'none', // none/fade/slide/convex/concave/zoom
+
+        menu: {
+          numbers: true,
+          custom: false,
+          themes: false,
+          transitions: false
+        },
+
+
+
+        // Optional reveal.js plugins
+        dependencies: [
+          { src: 'index_files/reveal.js-3.3.0.1/plugin/menu/menu.js', async: true },
+        ]
+      });
+    </script>
+  <!-- dynamically load mathjax for compatibility with self-contained -->
+  <script>
+    (function () {
+      var script = document.createElement("script");
+      script.type = "text/javascript";
+      script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+      document.getElementsByTagName("head")[0].appendChild(script);
+    })();
+  </script>
+
+<script>
+  (function() {
+    if (window.jQuery) {
+      Reveal.addEventListener( 'slidechanged', function(event) {  
+        window.jQuery(event.previousSlide).trigger('hidden');
+        window.jQuery(event.currentSlide).trigger('shown');
+      });
+    }
+  })();
+</script>
+
+
+  </body>
+</html>

@@ -1,0 +1,333 @@
+---
+pagetitle: Scatterplots and sample covariance
+output: 
+  revealjs::revealjs_presentation:
+    incremental: false
+    theme: solarized
+    self_contained: false
+    # reveal_plugins: ["menu","notes","chalkboard"]
+    reveal_plugins: ["menu"]
+    highlight: pygments
+    center: true
+    transition: none
+    background_transition: none 
+    reveal_options:
+      # chalkboard:
+      #   theme: whiteboard
+      #   toggleNotesButton: true
+      #   toggleChalkboardButton: true
+      menu:
+        numbers: true
+      slideNumber: true
+      previewLinks: false
+    fig_caption: true
+    pandoc_args:
+    - --indented-code-classes
+    - lineNumbers
+    css: mystyle.css
+    
+--- 
+
+<section>
+
+<h1>Scatterplots and sample covariance</h1>
+
+Based on Stock and Watson, ch. 3
+
+<br>
+
+<h2>[Jesper Bagger](mailto:jesper.bagger@rhul.ac.uk)</h2>
+
+<h3>EC3133 | Royal Holloway | 2020/21</h3>
+
+</section>
+
+
+```{r results='asis', echo=FALSE, include=FALSE}
+library(AER) # include Applied Econometrics with R package; contains many datasets
+
+data(CASchools) # Load CASchools data
+
+# Generate a couple of useful variables
+
+CASchools$STR <- CASchools$students/CASchools$teachers  # Student-teacher ratio
+CASchools$Score <- (CASchools$read + CASchools$math)/2  # Student test score
+```
+
+<!-- # Outline -->
+
+<!-- 1. Statistics with more than one random variable -->
+
+<!-- 2. Scatterplots -->
+
+<!-- 3. Sample covariance -->
+
+# Relationships between random variables
+
+## Relationships between random variables
+
+- Most interesting empirical questions relate to the relationship between random variables
+
+  - Education and earnings
+  
+  - Class size and student outcomes
+  
+  - The FTSE index and commodity prices
+  
+- Need tools to describe the sample relationship between random variables
+
+  - Scatterplots
+  
+  - Sample covariance
+
+# Scatterplots
+
+## Scatterplot
+
+```{r echo=FALSE, error=FALSE, warning=FALSE, attr.source='.numberLines startFrom="1"'}
+plot(CASchools$STR,CASchools$Score,
+     main = "Student-teacher ratio and test scores",
+     xlab = "Student-teacher ratio", 
+     ylab = "Test score",
+     col = "blue") 
+```
+
+## Scatter plots in R
+
+```{r, echo=TRUE, eval=FALSE, error=FALSE, warning=FALSE}
+library(AER) # Load AER library
+data(CASchools) # Load CASchools dataframe from AER library
+
+# Add student-teacher (STR) ratio and testscore (Score) to CASchools
+CASchools$STR <- CASchools$students/CASchools$teachers
+CASchools$Score <- (CASchools$read + CASchools$math)/2
+
+# Scatter plot
+plot(CASchools$STR,CASchools$Score,
+     main = "Student-teacher ratio and test scores",
+     xlab = "Student-teacher ratio", 
+     ylab = "Test score") 
+```
+
+## Scatterplots
+
+- Useful tool for describing relationships in the data, including nonlinear relationships
+
+- Conveys the range of observations in the data
+
+- Treats variables symmetrically; silent about causality 
+
+- Applicable to bivariate relationships
+
+# Sample covariance
+
+## Population and sample
+
+- The **population** is the entire pool from which a statistical sample is drawn (people, firms, objects, etc.)
+
+- The **sample** is a subset of the population
+
+- Statistics (and econometrics) deals with what we can learn about the population from a sample
+
+## Simple random sampling and i.i.d. samples
+
+- Suppose we are interested in the random variable $Y$ with population distribution $f_Y(y)$
+
+- Sample population **at random** $n$ times; each population-member is **equally likely to be included**:
+
+  $$\{Y_i; i=1,...,n\}$$
+- Random sampling means it is appropriate to treat the sample as a **collection of $n$ random variables**
+
+- Simple random sampling produces an **independently and identically distributed (i.i.d.) sample**
+
+  $$f_{Y_i}(y) = f_Y(y)$$
+
+## Population and sample average
+
+- The **population average** of $Y$ is 
+
+  $$\mu_{Y} = \mathrm{E}(Y) = \int y f_Y(y)dy,$$
+- The **sample average** is an estimator of $\mu_{Y}$
+
+  <div class="box">
+  $$\overline{Y} = \frac{1}{n} \sum_{i=1}^n Y_i$$
+  </div>
+  
+## Sample average in R
+
+```{r, echo=TRUE, eval=TRUE, error=FALSE, warning=FALSE}
+# Sample average student-teacher ratio
+mu_STR <- mean(CASchools$STR) # Sample average of STR
+mu_STR 
+```
+
+
+## Population and sample variance
+
+- The **population variance** of $Y$ is 
+
+  $$\sigma^2_{Y} = \mathrm{var}(Y) = \mathrm{E}[(Y - \mu_Y)^2]$$
+  
+- The **sample variance** is an estimator of $\sigma^2_{Y}$:
+
+  <div class="box">
+  
+  $$s^2_{Y} = \frac{1}{n-1} \sum_{i=1}^n (Y_i - \overline{Y})^2$$
+  </div>
+
+- Standard deviations are $\sigma_{Y} = \sqrt{\sigma^2_{Y}}$ and $s_{Y} = \sqrt{s^2_{Y}}$
+  
+## Sample variance and standard deviation in R
+
+```{r, echo=TRUE, eval=TRUE, error=FALSE, warning=FALSE}
+# Sample variance and s.d. of student-teacher ratio
+s2_STR <- var(CASchools$STR) # Sample variance of STR
+s2_STR
+
+s_STR <- sd(CASchools$STR) # Sample standard deviation of STR
+s_STR
+```
+
+
+## Sample covariance
+
+- The **population covariance** between two random variables $X$ and $Y$ is 
+
+  $$\sigma_{XY} = \mathrm{E}[(X-\mu_X)(Y-\mu_Y)]$$
+  
+- The **sample covariance** is an estimator of $\sigma_{XY}$:
+
+  <div class="box">
+  
+  $$s_{XY} = \frac{1}{n-1} \sum_{i=1}^n (X_i - \overline{X})(Y_i - \overline{Y})$$
+  </div>
+  
+## Sample correlation
+
+- The population correlation between $X$ and $Y$ is 
+
+  $$\rho_{XY} = \frac{\sigma_{XY}}{\sigma_X \sigma_Y}$$
+
+- The **sample correlation** is an estimator of $\rho_{XY}$, replacing population quantities w/ analogous sample quantities:
+
+  <div class="box">
+  
+  $$r_{XY} = \frac{s_{XY}}{s_X s_Y}$$
+  </div>
+
+## Sample covariance and correlation in R
+
+```{r, echo=TRUE, eval=TRUE, error=FALSE, warning=FALSE}
+
+# Sample covariance b/w STR and Score
+s_STR_Score <- cov(CASchools$STR,CASchools$Score) 
+s_STR_Score
+
+# Sample correlation b/w STR and Score
+r_STR_Score <- cor(CASchools$STR,CASchools$Score) 
+r_STR_Score
+```
+
+
+## Consistency
+
+- The estimators $\overline{Y}$, $s^2_Y$, and $s_{XY}$ are **consistent estimators** of the population parameters $\mu_Y$, $\sigma_Y^2$, and $\sigma_{XY}$
+
+  <div class="box">
+  
+  $$\overline{Y} \overset{p}{\rightarrow} \mu_Y; \quad s^2_Y \overset{p}{\rightarrow} \sigma_Y^2; \quad s_{XY} \overset{p}{\rightarrow} \sigma_{XY}$$
+  
+  </div>
+
+
+- There is a high probability that $\overline{Y}$, $s^2_Y$, and $s_{XY}$ are close to $\mu_Y$, $\sigma_Y^2$, and $\sigma_{XY}$, respectively, in large samples
+
+## Sample correlation examples
+
+```{r echo=FALSE, error=FALSE, warning=FALSE, out.width = "80%"}
+
+n <- 100
+muX <- 0
+sdX <- 1
+x <- rnorm(n, mean = muX, sd = sdX)
+
+muU <- 0
+sdU <- 1
+u <- rnorm(n, mean = muX, sd = sdX)
+
+alpha <- 0
+beta <- 2
+
+par(mfrow=c(2,2), mar = c(4.1,4.1,4.1,0))
+
+# Plot 1: No relationship, no correlation
+
+y <- alpha + sqrt(9)*u
+
+plot(x,y,
+     main = "Zero correlation",
+     xlab = " ",
+     ylab = "y",
+     col = "blue",
+     xlim = c(-4,4),
+     ylim = c(-10,10))
+
+
+# Plot 2: Linear relationship, positive correlation
+
+y <- alpha + 2.9*x + sqrt(0.59)*u
+
+plot(x,y,
+     main = "Positive correlation",
+     xlab = " ",
+     ylab = " ",
+     col = "blue",
+     xlim = c(-4,4),
+     ylim = c(-10,10))
+
+# Plot 3: Linear relationship, negative correlation
+
+y <- alpha - 2.9*x + sqrt(0.59)*u
+
+plot(x,y,
+     main = "Negative correlation",
+     xlab = "x",
+     ylab = "y",
+     col = "blue",
+     xlim = c(-4,4),
+     ylim = c(-10,10))
+
+# Plot 4: Nonlinear relationship, no correlation
+
+y <- (alpha - beta*sdX^2) + beta*x^2 + u
+
+plot(x,y,
+     main = "Zero correlation",
+     xlab = "x",
+     ylab = " ",
+     col = "blue",
+     xlim = c(-4,4),
+     ylim = c(-10,10))
+
+```
+
+## Sample covariance and correlation
+
+- Concise record of the relationship between two random variables $X$ and $Y$
+
+- Measures the strength of the **linear** relationship between two random variables $X$ and $Y$
+
+- Covariance and correlation treat $X$ and $Y$ symmetrically: correlation does not imply causation 
+
+# Summary 
+
+## Summary 
+
+- Scatterplots and sample correlations illustrate relationship b/w two random variables
+
+- Scatterplots capture nonlinearities, but do not provide quantitative summary
+  
+- Sample correlations provide quantitative summary, but measures only linear relationship
+  
+- Scatterplot relations or correlations does not imply causality
+
