@@ -1,5 +1,5 @@
 ---
-pagetitle: Scatterplots and sample covariance
+pagetitle: EC3133 scatterplots and sample covariance
 output: 
   revealjs::revealjs_presentation:
     incremental: false
